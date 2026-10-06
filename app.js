@@ -34,15 +34,15 @@ function loadTickets() {
   try { return JSON.parse(raw); } catch { return [...seedTickets]; }
 }
 
-function saveTickets(tickets) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+function saveTickets(items) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
 let tickets = loadTickets();
 let currentView = 'dashboard';
 
 const app = document.getElementById('app');
-const navButtons = [...document.querySelectorAll('.sidebar-link')];
+const navButtons = [...document.querySelectorAll('.support-nav-link')];
 
 navButtons.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -74,6 +74,19 @@ function urgencyClass(value) {
   return { baja:'badge-low', media:'badge-medium', alta:'badge-high', critica:'badge-critical' }[value] || 'badge-medium';
 }
 
+function pageHeader(kicker, title, subtitle, action = '') {
+  return `
+    <div class="support-page-header">
+      <div>
+        <div class="support-page-kicker">${kicker}</div>
+        <h2>${title}</h2>
+        <p>${subtitle}</p>
+      </div>
+      ${action}
+    </div>
+  `;
+}
+
 function render() {
   if (currentView === 'dashboard') renderDashboard();
   else if (currentView === 'new-ticket') renderNewTicket();
@@ -87,112 +100,128 @@ function renderDashboard() {
   const critical = tickets.filter(t => t.urgency === 'critica').length;
 
   app.innerHTML = `
-    <div class="page-header">
-      <div>
-        <h2>📊 Panel de Control</h2>
-        <p>Bienvenido, usuario@empresa.com</p>
+    ${pageHeader(
+      'SOPORTE → PANEL PRINCIPAL',
+      'Solicitudes de Soporte',
+      'Resumen general de tickets registrados y solicitudes que requieren atención.',
+      '<button class="support-button primary" id="goNew">Nueva solicitud</button>'
+    )}
+
+    <div class="support-tabs">
+      <span class="support-tab active">Solicitudes</span>
+      <span class="support-tab">Indicadores</span>
+    </div>
+
+    <div class="support-toolbar">
+      <div class="form-group grow">
+        <label>Buscar solicitud</label>
+        <input id="ticketSearch" class="support-filter" placeholder="ID, asunto o categoría" />
       </div>
-      <button class="btn-primary" id="goNew">➕ Nueva Solicitud</button>
+      <div class="form-group">
+        <label>Urgencia</label>
+        <select id="urgencyFilter" class="support-filter">
+          <option value="all">Todas</option>
+          <option value="baja">Baja</option>
+          <option value="media">Media</option>
+          <option value="alta">Alta</option>
+          <option value="critica">Crítica</option>
+        </select>
+      </div>
     </div>
 
-    <div class="metrics-grid">
-      <div class="metric-card"><span class="metric-title">Total Solicitudes</span><span class="metric-value">${total}</span></div>
-      <div class="metric-card warning"><span class="metric-title">En Atención</span><span class="metric-value">${attention}</span></div>
-      <div class="metric-card danger"><span class="metric-title">Urgencia Crítica</span><span class="metric-value">${critical}</span></div>
+    <div class="support-metrics">
+      <div class="support-metric"><span>Solicitudes registradas</span><strong>${total}</strong></div>
+      <div class="support-metric"><span>En atención</span><strong>${attention}</strong></div>
+      <div class="support-metric"><span>Urgencia crítica</span><strong>${critical}</strong></div>
     </div>
 
-    <section class="dashboard-section">
-      <h3>Solicitudes Recientes</h3>
-      ${ticketFiltersHtml()}
-      <div id="ticketList"></div>
-    </section>
+    <div id="ticketList"></div>
   `;
 
   document.getElementById('goNew').onclick = () => {
-    currentView = 'new-ticket'; setActiveNav(currentView); render();
+    currentView = 'new-ticket';
+    setActiveNav(currentView);
+    render();
   };
-  bindTicketFilters();
-}
 
-function ticketFiltersHtml() {
-  return `
-    <div class="ticket-filters">
-      <input id="ticketSearch" class="search-input" placeholder="Buscar por ID o asunto..." />
-      <select id="urgencyFilter" class="filter-select">
-        <option value="all">Todas las urgencias</option>
-        <option value="baja">Baja</option>
-        <option value="media">Media</option>
-        <option value="alta">Alta</option>
-        <option value="critica">Crítica</option>
-      </select>
-    </div>
-  `;
+  bindTicketFilters();
 }
 
 function bindTicketFilters() {
   const search = document.getElementById('ticketSearch');
   const urgency = document.getElementById('urgencyFilter');
+
   const draw = () => {
     const term = search.value.trim().toLowerCase();
     const urg = urgency.value;
     const filtered = tickets.filter(t => {
-      const matchText = String(t.id).includes(term) || t.title.toLowerCase().includes(term);
-      const matchUrgency = urg === 'all' || t.urgency === urg;
-      return matchText && matchUrgency;
+      const text = `${t.id} ${t.title} ${t.category}`.toLowerCase();
+      return text.includes(term) && (urg === 'all' || t.urgency === urg);
     });
-    renderTicketCards(filtered);
+    renderTicketTable(filtered);
   };
+
   search.addEventListener('input', draw);
   urgency.addEventListener('change', draw);
   draw();
 }
 
-function renderTicketCards(list) {
+function renderTicketTable(list) {
   const target = document.getElementById('ticketList');
   if (!list.length) {
-    target.innerHTML = '<div class="empty-state">No se encontraron tickets.</div>';
+    target.innerHTML = '<div class="empty-state">No se encontraron solicitudes con esos criterios.</div>';
     return;
   }
 
-  target.innerHTML = `<div class="ticket-grid">${list.map(t => `
-    <article class="ticket-card" data-ticket-id="${t.id}">
-      <div class="ticket-card-header">
-        <strong>#${t.id}</strong>
-        <div>
-          ${t.confidential ? '<span class="badge badge-confidential">🔒 Confidencial</span>' : ''}
-          <span class="badge ${urgencyClass(t.urgency)}">${urgencyLabel(t.urgency).toUpperCase()}</span>
-        </div>
-      </div>
-      <h4 class="ticket-title">${escapeHtml(t.title)}</h4>
-      <div class="ticket-meta">
-        <span>📁 ${escapeHtml(t.category)}</span>
-        <span>⏱️ ${new Date(t.createdAt).toLocaleDateString('es-CO')}</span>
-      </div>
-      <div class="ticket-card-footer">
-        <span class="status-pill">${escapeHtml(t.status)}</span>
-        <span>Ver detalle →</span>
-      </div>
-    </article>
-  `).join('')}</div>`;
+  target.innerHTML = `
+    <div class="support-table-wrap">
+      <table class="support-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Solicitud</th>
+            <th>Categoría</th>
+            <th>Urgencia</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(t => `
+            <tr data-ticket-id="${t.id}">
+              <td>#${t.id}</td>
+              <td>
+                <div class="support-ticket-title">${escapeHtml(t.title)}</div>
+                ${t.confidential ? '<span class="badge badge-confidential">Confidencial</span>' : ''}
+              </td>
+              <td>${escapeHtml(t.category)}</td>
+              <td><span class="badge ${urgencyClass(t.urgency)}">${urgencyLabel(t.urgency)}</span></td>
+              <td><span class="status-pill">${escapeHtml(t.status)}</span></td>
+              <td>${new Date(t.createdAt).toLocaleDateString('es-CO')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
 
-  target.querySelectorAll('[data-ticket-id]').forEach(card => {
-    card.addEventListener('click', () => renderTicketDetail(Number(card.dataset.ticketId)));
+  target.querySelectorAll('[data-ticket-id]').forEach(row => {
+    row.addEventListener('click', () => renderTicketDetail(Number(row.dataset.ticketId)));
   });
 }
 
 function renderNewTicket() {
   app.innerHTML = `
-    <div class="page-header">
-      <div>
-        <h2>➕ Crear Nueva Solicitud</h2>
-        <p>Versión HTML + CSS + JavaScript. Los datos se guardan en este navegador.</p>
-      </div>
-      <button class="btn-secondary" id="backDashboard">← Volver al Panel</button>
-    </div>
+    ${pageHeader(
+      'SOPORTE → NUEVA SOLICITUD',
+      'Registrar solicitud',
+      'Complete los datos requeridos para enviar la solicitud a la mesa de soporte.',
+      '<button class="support-button secondary" id="backDashboard">Volver</button>'
+    )}
 
     <form id="ticketForm" class="form-card">
       <div class="form-group">
-        <label>Asunto / Título *</label>
+        <label>Asunto / título *</label>
         <input name="title" required placeholder="Ej: Falla en acceso a servidor de base de datos" />
       </div>
 
@@ -207,7 +236,7 @@ function renderNewTicket() {
           </select>
         </div>
         <div class="form-group">
-          <label>Nivel de Urgencia *</label>
+          <label>Nivel de urgencia *</label>
           <select name="urgency">
             <option value="baja">Baja</option>
             <option value="media" selected>Media</option>
@@ -221,39 +250,45 @@ function renderNewTicket() {
 
       <label class="checkbox-row">
         <input type="checkbox" name="confidential" />
-        🔒 Marcar esta solicitud como confidencial
+        Marcar esta solicitud como confidencial
       </label>
 
       <div class="form-group">
-        <label>Descripción Detallada *</label>
+        <label>Descripción detallada *</label>
         <textarea name="description" rows="5" required placeholder="Describe el problema o requerimiento..."></textarea>
       </div>
 
       <div class="form-group">
         <label>Adjuntar evidencias</label>
         <input type="file" id="attachments" multiple />
-        <div class="small">En esta versión estática se conserva el nombre de los archivos; no se suben a un servidor.</div>
+        <div class="small">En esta versión estática se conserva el nombre del archivo.</div>
       </div>
 
       <div class="form-actions">
-        <button class="btn-primary" type="submit">Crear Ticket</button>
+        <button class="support-button primary" type="submit">Crear solicitud</button>
       </div>
     </form>
   `;
 
   document.getElementById('backDashboard').onclick = () => {
-    currentView='dashboard'; setActiveNav(currentView); render();
+    currentView = 'dashboard';
+    setActiveNav(currentView);
+    render();
   };
 
   const category = document.getElementById('category');
   const dynamic = document.getElementById('dynamicFields');
+
   const refreshDynamic = () => {
     if (category.value === 'hardware') {
-      dynamic.innerHTML = '<div class="form-group"><label>Tipo de Equipo Requerido</label><input name="equipmentType" placeholder="Ej: Laptop i7, Monitor secundario" /></div>';
+      dynamic.innerHTML = '<div class="form-group"><label>Tipo de equipo requerido</label><input name="equipmentType" placeholder="Ej: Laptop i7, monitor secundario" /></div>';
     } else if (category.value === 'software_access') {
-      dynamic.innerHTML = '<div class="form-group"><label>Sistema o BD solicitado</label><input name="systemName" placeholder="Ej: Portal ERP, SQL Server Staging" /></div>';
-    } else dynamic.innerHTML = '';
+      dynamic.innerHTML = '<div class="form-group"><label>Sistema o base de datos</label><input name="systemName" placeholder="Ej: Portal ERP, SQL Server Staging" /></div>';
+    } else {
+      dynamic.innerHTML = '';
+    }
   };
+
   category.addEventListener('change', refreshDynamic);
   refreshDynamic();
 
@@ -262,6 +297,7 @@ function renderNewTicket() {
     const form = new FormData(e.target);
     const files = [...document.getElementById('attachments').files].map(f => f.name);
     const nextId = tickets.length ? Math.max(...tickets.map(t => Number(t.id))) + 1 : 1001;
+
     tickets.unshift({
       id: nextId,
       title: form.get('title'),
@@ -275,6 +311,7 @@ function renderNewTicket() {
       customField: form.get('equipmentType') || form.get('systemName') || '',
       attachments: files
     });
+
     saveTickets(tickets);
     currentView = 'dashboard';
     setActiveNav(currentView);
@@ -284,68 +321,106 @@ function renderNewTicket() {
 
 function renderTicketsPage() {
   app.innerHTML = `
-    <div class="page-header"><div><h2>📑 Mis Solicitudes</h2><p>Consulta y filtra los tickets registrados.</p></div></div>
-    ${ticketFiltersHtml()}
+    ${pageHeader(
+      'SOPORTE → MIS SOLICITUDES',
+      'Mis solicitudes',
+      'Consulta el histórico de solicitudes creadas desde este módulo.'
+    )}
+
+    <div class="support-toolbar">
+      <div class="form-group grow">
+        <label>Buscar solicitud</label>
+        <input id="ticketSearch" class="support-filter" placeholder="ID, asunto o categoría" />
+      </div>
+      <div class="form-group">
+        <label>Urgencia</label>
+        <select id="urgencyFilter" class="support-filter">
+          <option value="all">Todas</option>
+          <option value="baja">Baja</option>
+          <option value="media">Media</option>
+          <option value="alta">Alta</option>
+          <option value="critica">Crítica</option>
+        </select>
+      </div>
+    </div>
+
     <div id="ticketList"></div>
   `;
+
   bindTicketFilters();
 }
 
 function renderTicketDetail(id) {
   const t = tickets.find(x => Number(x.id) === Number(id));
   if (!t) return;
+
   app.innerHTML = `
-    <div class="page-header">
-      <div><h2>🎫 Detalle de Solicitud #${t.id}</h2><span class="status-pill">${escapeHtml(t.status)}</span></div>
-      <button class="btn-secondary" id="backTickets">← Volver</button>
-    </div>
+    ${pageHeader(
+      'SOPORTE → DETALLE',
+      `Solicitud #${t.id}`,
+      'Información completa y trazabilidad básica de la solicitud.',
+      '<button class="support-button secondary" id="backTickets">Volver</button>'
+    )}
 
     <div class="detail-card">
-      <div class="ticket-card-header">
-        <h3>${escapeHtml(t.title)}</h3>
-        ${t.confidential ? '<span class="badge badge-confidential">🔒 Ticket Confidencial</span>' : ''}
+      <div class="support-page-header">
+        <div>
+          <div class="support-ticket-title">${escapeHtml(t.title)}</div>
+          <span class="status-pill">${escapeHtml(t.status)}</span>
+        </div>
+        ${t.confidential ? '<span class="badge badge-confidential">Confidencial</span>' : ''}
       </div>
 
       <div class="ticket-detail-grid">
-        <div><strong>Categoría:</strong><p>${escapeHtml(t.category)}</p></div>
-        <div><strong>Urgencia:</strong><p>${urgencyLabel(t.urgency)}</p></div>
-        <div><strong>Creado Por:</strong><p>${escapeHtml(t.createdBy || 'Usuario Demo')}</p></div>
-        <div><strong>Fecha:</strong><p>${new Date(t.createdAt).toLocaleString('es-CO')}</p></div>
+        <div class="detail-field"><strong>Categoría</strong><p>${escapeHtml(t.category)}</p></div>
+        <div class="detail-field"><strong>Urgencia</strong><p>${urgencyLabel(t.urgency)}</p></div>
+        <div class="detail-field"><strong>Creado por</strong><p>${escapeHtml(t.createdBy || 'Usuario Demo')}</p></div>
+        <div class="detail-field"><strong>Fecha de creación</strong><p>${new Date(t.createdAt).toLocaleString('es-CO')}</p></div>
       </div>
 
       <hr class="divider" />
       <h4>Descripción</h4>
-      <p>${escapeHtml(t.description)}</p>
+      <p class="support-muted">${escapeHtml(t.description)}</p>
 
-      ${t.customField ? `<hr class="divider" /><h4>Información adicional</h4><p>${escapeHtml(t.customField)}</p>` : ''}
+      ${t.customField ? `<hr class="divider" /><h4>Información adicional</h4><p class="support-muted">${escapeHtml(t.customField)}</p>` : ''}
 
       <hr class="divider" />
-      <h4>📁 Archivos Adjuntos</h4>
-      ${t.attachments?.length ? `<ul class="file-list">${t.attachments.map(f=>`<li>${escapeHtml(f)}</li>`).join('')}</ul>` : '<p class="small">No hay archivos adjuntos.</p>'}
+      <h4>Archivos adjuntos</h4>
+      ${t.attachments?.length
+        ? `<ul>${t.attachments.map(f => `<li>${escapeHtml(f)}</li>`).join('')}</ul>`
+        : '<p class="small">No hay archivos adjuntos.</p>'
+      }
     </div>
   `;
+
   document.getElementById('backTickets').onclick = () => {
-    currentView='dashboard'; setActiveNav(currentView); render();
+    currentView = 'dashboard';
+    setActiveNav(currentView);
+    render();
   };
 }
 
 function renderDeveloper() {
   app.innerHTML = `
-    <div class="page-header">
-      <div><h2>🛠️ Vista Desarrollador</h2><p>Información técnica de esta versión estática.</p></div>
-    </div>
+    ${pageHeader(
+      'SOPORTE → CONFIGURACIÓN',
+      'Configuración del módulo',
+      'Información técnica de la versión estática preparada para integrarse a una aplicación mayor.'
+    )}
+
     <div class="dev-card">
-      <h3>Arquitectura actual</h3>
       <div class="dev-grid">
         <div class="dev-box"><strong>Frontend</strong><p>HTML5 + CSS3 + JavaScript puro</p></div>
         <div class="dev-box"><strong>Persistencia</strong><p>localStorage del navegador</p></div>
+        <div class="dev-box"><strong>Integración</strong><p>Estilos encapsulados con prefijo support-</p></div>
         <div class="dev-box"><strong>Hosting</strong><p>Compatible con GitHub Pages</p></div>
-        <div class="dev-box"><strong>Dependencias</strong><p>Ninguna</p></div>
       </div>
+
       <hr class="divider" />
-      <button class="btn-danger" id="resetData">Restablecer datos de prueba</button>
+      <button class="support-button danger" id="resetData">Restablecer datos de prueba</button>
     </div>
   `;
+
   document.getElementById('resetData').onclick = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(seedTickets));
     tickets = loadTickets();
