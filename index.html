@@ -3,27 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sistema de Tickets Corporativos</title>
+  <title>Soporte Desarrollo</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="navbar">
-    <div class="navbar-brand">🎫 Sistema de Tickets Corporativos</div>
-    <div class="user-profile-menu">
-      <span id="currentUser">Usuario Demo</span>
-      <span class="user-role-badge">Administrador</span>
-    </div>
-  </header>
+  <div class="support-shell">
+    <aside class="support-sidebar">
+      <div class="support-brand">
+        <div class="support-brand-mark">SD</div>
+        <div>
+          <strong>Soporte</strong>
+          <span>Gestión de solicitudes</span>
+        </div>
+      </div>
 
-  <div class="app-body">
-    <aside class="sidebar">
-      <button class="sidebar-link active" data-view="dashboard">📊 Panel Principal</button>
-      <button class="sidebar-link" data-view="new-ticket">➕ Nuevo Ticket</button>
-      <button class="sidebar-link" data-view="tickets">📑 Mis Solicitudes</button>
-      <button class="sidebar-link" data-view="developer">🛠️ Vista Desarrollador <span class="badge-dev">Dev</span></button>
+      <div class="support-section-label">SOPORTE</div>
+      <button class="support-nav-link active" data-view="dashboard">Panel principal</button>
+      <button class="support-nav-link" data-view="new-ticket">Nueva solicitud</button>
+      <button class="support-nav-link" data-view="tickets">Mis solicitudes</button>
+
+      <div class="support-section-label">ADMINISTRACIÓN</div>
+      <button class="support-nav-link" data-view="developer">Configuración</button>
     </aside>
 
-    <main id="app" class="main-content"></main>
+    <section class="support-workspace">
+      <header class="support-topbar">
+        <div>
+          <div class="support-eyebrow">SOPORTE / SOLICITUDES</div>
+          <h1>Gestión de Soporte</h1>
+          <p>Registro, seguimiento y control de solicitudes internas.</p>
+        </div>
+
+        <div class="support-user-card">
+          <div class="support-user-row">
+            <div>
+              <span class="support-user-label">Usuario</span>
+              <strong id="currentUser">Usuario Demo</strong>
+            </div>
+            <span class="support-role-pill">Administrador</span>
+          </div>
+          <span class="support-user-meta">Sede principal · Mesa de ayuda</span>
+        </div>
+      </header>
+
+      <main id="app" class="support-module"></main>
+    </section>
   </div>
 
   <script src="app.js"></script>
