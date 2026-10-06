@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sistema de Tickets Corporativos</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-brand">🎫 Sistema de Tickets Corporativos</div>
+    <div class="user-profile-menu">
+      <span id="currentUser">Usuario Demo</span>
+      <span class="user-role-badge">Administrador</span>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <aside class="sidebar">
+      <button class="sidebar-link active" data-view="dashboard">📊 Panel Principal</button>
+      <button class="sidebar-link" data-view="new-ticket">➕ Nuevo Ticket</button>
+      <button class="sidebar-link" data-view="tickets">📑 Mis Solicitudes</button>
+      <button class="sidebar-link" data-view="developer">🛠️ Vista Desarrollador <span class="badge-dev">Dev</span></button>
+    </aside>
+
+    <main id="app" class="main-content"></main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
