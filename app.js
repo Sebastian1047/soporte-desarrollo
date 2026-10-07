@@ -179,10 +179,6 @@ function renderNewRequestForm() {
           <small>Puede adjuntar capturas, documentos o archivos relacionados.</small>
         </div>
 
-        <label class="checkbox-row full">
-          <input id="requestConfidential" name="confidential" type="checkbox" />
-          <span>Marcar la solicitud como confidencial</span>
-        </label>
       </div>
 
       <div class="form-actions">
@@ -210,7 +206,6 @@ function renderNewRequestForm() {
       priority: formData.get("priority"),
       businessImpact: formData.get("businessImpact"),
       description: formData.get("description").trim(),
-      confidential: formData.get("confidential") === "on",
       attachments: files,
       status: "Pendiente",
       createdAt: new Date().toISOString(),
