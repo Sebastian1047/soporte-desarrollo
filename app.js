@@ -4,7 +4,6 @@ const users = {
     name: "María López",
     role: "Solicitante",
     menu: [
-      { id: "home", label: "Inicio" },
       { id: "new", label: "Nueva solicitud" },
       { id: "mine", label: "Mis solicitudes" }
     ],
@@ -20,7 +19,6 @@ const users = {
     name: "Carlos Gómez",
     role: "Área de Desarrollo",
     menu: [
-      { id: "home", label: "Inicio" },
       { id: "inbox", label: "Bandeja de solicitudes" },
       { id: "tracking", label: "Seguimiento" }
     ],
@@ -43,7 +41,7 @@ const requestTypes = {
 };
 
 let currentUserKey = "solicitante";
-let currentView = "home";
+let currentView = "new";
 
 const sidebarMenu = document.getElementById("sidebarMenu");
 const userSelector = document.getElementById("userSelector");
@@ -267,7 +265,7 @@ function render() {
 
 userSelector.addEventListener("change", () => {
   currentUserKey = userSelector.value;
-  currentView = "home";
+  currentView = currentUserKey === "solicitante" ? "new" : "inbox";
   render();
 });
 
