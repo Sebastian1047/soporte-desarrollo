@@ -9,7 +9,7 @@ const users = {
       { id: "mine", label: "Mis solicitudes" }
     ],
     permissions: [
-      "Crear solicitudes relacionadas con aplicaciones.",
+      "Crear solicitudes de nuevos desarrollos o mejoras de aplicaciones.",
       "Consultar únicamente sus propias solicitudes.",
       "Ver el detalle y estado de sus solicitudes.",
       "Agregar comentarios o información adicional a sus solicitudes."
@@ -25,7 +25,7 @@ const users = {
       { id: "tracking", label: "Seguimiento" }
     ],
     permissions: [
-      "Consultar todas las solicitudes de aplicaciones.",
+      "Consultar todas las solicitudes de desarrollo y mejora.",
       "Cambiar estado y prioridad.",
       "Asignar o cambiar desarrollador responsable.",
       "Agregar comentarios de atención y seguimiento."
@@ -33,19 +33,13 @@ const users = {
   }
 };
 
-const STORAGE_KEY = "solicitudesDesarrolloAplicaciones";
+const STORAGE_KEY = "solicitudesNuevosDesarrollos";
 
 const requestTypes = {
-  app_no_abre: "Aplicación no abre / no carga",
-  app_error: "Aplicación presenta error",
-  app_desactualizada: "Aplicación desactualizada",
-  app_lenta: "Aplicación lenta / bajo rendimiento",
-  mejora: "Solicitud de mejora",
-  nueva_funcionalidad: "Solicitud de nueva funcionalidad",
-  nueva_aplicacion: "Solicitud de nueva aplicación",
-  datos: "Problema con información o datos",
-  acceso: "Problema de permisos o acceso",
-  otro: "Otro problema de aplicación"
+  nuevo_desarrollo: "Nuevo desarrollo",
+  nueva_aplicacion: "Nueva aplicación",
+  mejora_aplicacion: "Mejora de aplicación existente",
+  nueva_funcionalidad: "Nueva funcionalidad en aplicación existente"
 };
 
 let currentUserKey = "solicitante";
@@ -102,7 +96,7 @@ function renderNewRequestForm() {
     <div class="page-kicker">DESARROLLO DE APLICACIONES → SOLICITANTE</div>
     <h2 class="page-title">Nueva solicitud</h2>
     <p class="page-description">
-      Registre un incidente, mejora, nueva funcionalidad o solicitud de aplicación para el Área de Desarrollo.
+      Registre una solicitud para un nuevo desarrollo o una mejora en una aplicación existente.
     </p>
 
     <div id="formMessage"></div>
@@ -129,7 +123,7 @@ function renderNewRequestForm() {
             type="text"
             required
             maxlength="120"
-            placeholder="Ej: La aplicación de inventarios no permite guardar pedidos"
+            placeholder="Ej: Nueva funcionalidad para aprobar solicitudes de compra"
           />
         </div>
 
@@ -144,12 +138,12 @@ function renderNewRequestForm() {
         </div>
 
         <div class="form-group">
-          <label for="businessImpact">Impacto en la operación *</label>
+          <label for="businessImpact">Impacto esperado en la operación *</label>
           <select id="businessImpact" name="businessImpact" required>
-            <option value="bajo">Bajo - puedo continuar trabajando</option>
-            <option value="medio" selected>Medio - afecta parcialmente el proceso</option>
-            <option value="alto">Alto - impide una actividad importante</option>
-            <option value="total">Total - el proceso está detenido</option>
+            <option value="bajo">Bajo - mejora menor</option>
+            <option value="medio" selected>Medio - optimiza una actividad frecuente</option>
+            <option value="alto">Alto - mejora un proceso importante</option>
+            <option value="muy_alto">Muy alto - impacto estratégico o crítico</option>
           </select>
         </div>
 
@@ -163,12 +157,12 @@ function renderNewRequestForm() {
             rows="5"
             required
             maxlength="2000"
-            placeholder="Explique la necesidad con el mayor detalle posible."
+            placeholder="Explique qué desarrollo o mejora necesita, para qué se requiere y cuál sería el resultado esperado."
           ></textarea>
         </div>
 
         <div class="form-group full">
-          <label for="requestFiles">Capturas o evidencias</label>
+          <label for="requestFiles">Archivos de referencia</label>
           <input
             id="requestFiles"
             name="attachments"
@@ -176,7 +170,7 @@ function renderNewRequestForm() {
             multiple
             accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,.xlsx,.txt"
           />
-          <small>Puede adjuntar capturas, documentos o archivos relacionados.</small>
+          <small>Puede adjuntar documentos, imágenes, ejemplos o archivos relacionados con la solicitud.</small>
         </div>
 
       </div>
@@ -247,7 +241,7 @@ function renderContent() {
     description = "Aquí construiremos la bandeja de trabajo del Área de Desarrollo.";
   } else if (currentView === "tracking") {
     title = "Seguimiento";
-    description = "Aquí construiremos el seguimiento y gestión de solicitudes de aplicaciones.";
+    description = "Aquí construiremos el seguimiento de nuevos desarrollos y mejoras.";
   }
 
   app.innerHTML = `
