@@ -184,7 +184,7 @@ button,select,input,textarea{font:inherit}
 
 .request-form{
   margin-top:18px;
-  max-width:980px;
+  max-width:1050px;
   border:1px solid var(--border);
   border-radius:15px;
   background:#fbfdfc;
@@ -197,6 +197,14 @@ button,select,input,textarea{font:inherit}
 }
 .form-group{min-width:0}
 .form-group.full,.full{grid-column:1 / -1}
+.form-section-title{
+  margin-top:3px;
+  padding-bottom:7px;
+  border-bottom:1px solid var(--border);
+  color:#173e2b;
+  font-size:.68rem;
+  font-weight:900;
+}
 .form-group label{
   display:block;
   margin:0 0 5px;
@@ -237,9 +245,7 @@ button,select,input,textarea{font:inherit}
   font-size:.66rem;
   cursor:pointer;
 }
-.checkbox-row input{
-  accent-color:var(--green);
-}
+.checkbox-row input{accent-color:var(--green)}
 .form-actions{
   display:flex;
   justify-content:flex-end;
@@ -266,7 +272,7 @@ button,select,input,textarea{font:inherit}
 }
 .success-message{
   margin-top:14px;
-  max-width:980px;
+  max-width:1050px;
   padding:11px 13px;
   border:1px solid #bddcc8;
   border-radius:11px;
