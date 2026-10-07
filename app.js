@@ -243,41 +243,7 @@ function dynamicFieldsByType(type) {
     `;
   }
 
-  return `
-    <div class="form-section-title full">Información del incidente</div>
-
-    ${commonApplicationFields()}
-
-    <div class="form-group full">
-      <label for="userAction">¿Qué estaba intentando hacer?</label>
-      <textarea id="userAction" name="userAction" rows="3"
-        placeholder="Describa los pasos que estaba realizando antes del problema."></textarea>
-    </div>
-
-    <div class="form-group full">
-      <label for="errorMessage">Mensaje de error</label>
-      <textarea id="errorMessage" name="errorMessage" rows="2"
-        placeholder="Copie el mensaje de error si aparece alguno."></textarea>
-    </div>
-
-    <div class="form-group">
-      <label for="frequency">¿Con qué frecuencia ocurre?</label>
-      <select id="frequency" name="frequency">
-        <option value="una_vez">Ocurrió una vez</option>
-        <option value="intermitente">Ocurre algunas veces</option>
-        <option value="siempre">Ocurre siempre</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="affectedUsers">Usuarios afectados</label>
-      <select id="affectedUsers" name="affectedUsers">
-        <option value="solo_yo">Solo yo</option>
-        <option value="varios">Varios usuarios</option>
-        <option value="todos">Todos los usuarios</option>
-      </select>
-    </div>
-  `;
+  return "";
 }
 
 function collectDynamicData(formData, type) {
@@ -303,10 +269,7 @@ function collectDynamicData(formData, type) {
     ]
   };
 
-  const defaultKeys = [
-    "applicationName", "moduleName", "userAction",
-    "errorMessage", "frequency", "affectedUsers"
-  ];
+  const defaultKeys = [];
 
   const keys = keysByType[type] || defaultKeys;
   const result = {};
