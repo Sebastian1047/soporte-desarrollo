@@ -137,16 +137,6 @@ function renderNewRequestForm() {
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="businessImpact">Impacto esperado en la operación *</label>
-          <select id="businessImpact" name="businessImpact" required>
-            <option value="bajo">Bajo - mejora menor</option>
-            <option value="medio" selected>Medio - optimiza una actividad frecuente</option>
-            <option value="alto">Alto - mejora un proceso importante</option>
-            <option value="muy_alto">Muy alto - impacto estratégico o crítico</option>
-          </select>
-        </div>
-
         <div class="form-section-title full">Detalle de la solicitud</div>
 
         <div class="form-group full">
@@ -198,7 +188,6 @@ function renderNewRequestForm() {
       requestTypeLabel: requestTypes[type],
       title: formData.get("title").trim(),
       priority: formData.get("priority"),
-      businessImpact: formData.get("businessImpact"),
       description: formData.get("description").trim(),
       attachments: files,
       status: "Pendiente",
