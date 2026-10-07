@@ -9,31 +9,44 @@ const users = {
       { id: "mine", label: "Mis solicitudes" }
     ],
     permissions: [
-      "Crear nuevas solicitudes.",
+      "Crear solicitudes relacionadas con aplicaciones.",
       "Consultar únicamente sus propias solicitudes.",
       "Ver el detalle y estado de sus solicitudes.",
       "Agregar comentarios o información adicional a sus solicitudes."
     ]
   },
-  ti: {
+  desarrollo: {
     id: 2,
     name: "Carlos Gómez",
-    role: "Área TI",
+    role: "Área de Desarrollo",
     menu: [
       { id: "home", label: "Inicio" },
       { id: "inbox", label: "Bandeja de solicitudes" },
       { id: "tracking", label: "Seguimiento" }
     ],
     permissions: [
-      "Consultar todas las solicitudes del sistema.",
+      "Consultar todas las solicitudes de aplicaciones.",
       "Cambiar estado y prioridad.",
-      "Asignar o cambiar responsable.",
+      "Asignar o cambiar desarrollador responsable.",
       "Agregar comentarios de atención y seguimiento."
     ]
   }
 };
 
-const STORAGE_KEY = "soporteSolicitudes";
+const STORAGE_KEY = "solicitudesDesarrolloAplicaciones";
+
+const requestTypes = {
+  app_no_abre: "Aplicación no abre / no carga",
+  app_error: "Aplicación presenta error",
+  app_desactualizada: "Aplicación desactualizada",
+  app_lenta: "Aplicación lenta / bajo rendimiento",
+  mejora: "Solicitud de mejora",
+  nueva_funcionalidad: "Solicitud de nueva funcionalidad",
+  nueva_aplicacion: "Solicitud de nueva aplicación",
+  datos: "Problema con información o datos",
+  acceso: "Problema de permisos o acceso",
+  otro: "Otro problema de aplicación"
+};
 
 let currentUserKey = "solicitante";
 let currentView = "home";
@@ -84,58 +97,254 @@ function renderMenu() {
   });
 }
 
-function dynamicFieldByCategory(category) {
-  if (category === "hardware") {
+function commonApplicationFields() {
+  return `
+    <div class="form-group">
+      <label for="applicationName">Aplicación afectada *</label>
+      <input
+        id="applicationName"
+        name="applicationName"
+        type="text"
+        required
+        placeholder="Ej: Producción, Inventarios, Portal Comercial..."
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="moduleName">Módulo / pantalla</label>
+      <input
+        id="moduleName"
+        name="moduleName"
+        type="text"
+        placeholder="Ej: Inicio de sesión, Pedidos, Reportes..."
+      />
+    </div>
+  `;
+}
+
+function dynamicFieldsByType(type) {
+  if (type === "nueva_aplicacion") {
     return `
+      <div class="form-section-title full">Información de la nueva aplicación</div>
+
+      <div class="form-group">
+        <label for="proposedName">Nombre propuesto</label>
+        <input id="proposedName" name="proposedName" type="text"
+          placeholder="Ej: Control de mantenimiento" />
+      </div>
+
+      <div class="form-group">
+        <label for="requestingArea">Área solicitante *</label>
+        <input id="requestingArea" name="requestingArea" type="text" required
+          placeholder="Ej: Producción, Comercial, Gestión Humana..." />
+      </div>
+
       <div class="form-group full">
-        <label for="additionalInfo">Tipo de equipo requerido</label>
-        <input id="additionalInfo" name="additionalInfo" type="text"
-          placeholder="Ej: portátil, monitor, teclado, impresora..." />
+        <label for="businessProblem">Problema que se quiere resolver *</label>
+        <textarea id="businessProblem" name="businessProblem" rows="4" required
+          placeholder="Explique el problema actual que debería resolver la nueva aplicación."></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label for="applicationObjective">Objetivo de la aplicación *</label>
+        <textarea id="applicationObjective" name="applicationObjective" rows="3" required
+          placeholder="¿Qué debería permitir hacer la nueva aplicación?"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="targetUsers">Usuarios que la utilizarían</label>
+        <input id="targetUsers" name="targetUsers" type="text"
+          placeholder="Ej: Supervisores, auxiliares, administradores..." />
+      </div>
+
+      <div class="form-group">
+        <label for="estimatedUsers">Cantidad aproximada de usuarios</label>
+        <input id="estimatedUsers" name="estimatedUsers" type="number" min="1"
+          placeholder="Ej: 25" />
       </div>
     `;
   }
 
-  if (category === "software") {
+  if (type === "mejora" || type === "nueva_funcionalidad") {
     return `
+      <div class="form-section-title full">Información de la aplicación y cambio solicitado</div>
+
+      ${commonApplicationFields()}
+
       <div class="form-group full">
-        <label for="additionalInfo">Sistema, aplicación o base de datos</label>
-        <input id="additionalInfo" name="additionalInfo" type="text"
-          placeholder="Ej: ERP, SQL Server, portal corporativo..." />
+        <label for="currentSituation">Situación actual *</label>
+        <textarea id="currentSituation" name="currentSituation" rows="3" required
+          placeholder="Describa cómo funciona actualmente y qué limitación presenta."></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label for="requestedChange">${type === "mejora" ? "Mejora solicitada" : "Nueva funcionalidad solicitada"} *</label>
+        <textarea id="requestedChange" name="requestedChange" rows="4" required
+          placeholder="Explique claramente qué cambio necesita."></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label for="expectedResult">Resultado esperado *</label>
+        <textarea id="expectedResult" name="expectedResult" rows="3" required
+          placeholder="¿Cómo debería funcionar después del cambio?"></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label for="justification">Justificación</label>
+        <textarea id="justification" name="justification" rows="3"
+          placeholder="Explique por qué este cambio es importante para el proceso."></textarea>
       </div>
     `;
   }
 
-  if (category === "redes") {
+  if (type === "acceso") {
     return `
+      <div class="form-section-title full">Información del acceso</div>
+
+      ${commonApplicationFields()}
+
+      <div class="form-group">
+        <label for="accessType">Tipo de acceso requerido</label>
+        <input id="accessType" name="accessType" type="text"
+          placeholder="Ej: Consulta, edición, administrador..." />
+      </div>
+
+      <div class="form-group">
+        <label for="affectedUser">Usuario afectado</label>
+        <input id="affectedUser" name="affectedUser" type="text"
+          placeholder="Nombre o usuario corporativo" />
+      </div>
+
       <div class="form-group full">
-        <label for="additionalInfo">Ubicación o recurso afectado</label>
-        <input id="additionalInfo" name="additionalInfo" type="text"
-          placeholder="Ej: Sede JL, WiFi oficina, VPN..." />
+        <label for="accessDetail">Detalle del problema *</label>
+        <textarea id="accessDetail" name="accessDetail" rows="4" required
+          placeholder="Explique qué acceso necesita o qué mensaje recibe actualmente."></textarea>
+      </div>
+    `;
+  }
+
+  if (type === "datos") {
+    return `
+      <div class="form-section-title full">Información del problema de datos</div>
+
+      ${commonApplicationFields()}
+
+      <div class="form-group full">
+        <label for="dataIssue">Dato o información incorrecta *</label>
+        <textarea id="dataIssue" name="dataIssue" rows="4" required
+          placeholder="Indique qué dato está incorrecto, faltante, duplicado o desactualizado."></textarea>
+      </div>
+
+      <div class="form-group full">
+        <label for="expectedData">Valor o resultado esperado</label>
+        <textarea id="expectedData" name="expectedData" rows="3"
+          placeholder="Indique cómo debería verse o comportarse la información."></textarea>
       </div>
     `;
   }
 
   return `
+    <div class="form-section-title full">Información del incidente</div>
+
+    ${commonApplicationFields()}
+
     <div class="form-group full">
-      <label for="additionalInfo">Equipo o servicio afectado</label>
-      <input id="additionalInfo" name="additionalInfo" type="text"
-        placeholder="Ej: equipo portátil, correo, impresora..." />
+      <label for="userAction">¿Qué estaba intentando hacer?</label>
+      <textarea id="userAction" name="userAction" rows="3"
+        placeholder="Describa los pasos que estaba realizando antes del problema."></textarea>
+    </div>
+
+    <div class="form-group full">
+      <label for="errorMessage">Mensaje de error</label>
+      <textarea id="errorMessage" name="errorMessage" rows="2"
+        placeholder="Copie el mensaje de error si aparece alguno."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="frequency">¿Con qué frecuencia ocurre?</label>
+      <select id="frequency" name="frequency">
+        <option value="una_vez">Ocurrió una vez</option>
+        <option value="intermitente">Ocurre algunas veces</option>
+        <option value="siempre">Ocurre siempre</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="affectedUsers">Usuarios afectados</label>
+      <select id="affectedUsers" name="affectedUsers">
+        <option value="solo_yo">Solo yo</option>
+        <option value="varios">Varios usuarios</option>
+        <option value="todos">Todos los usuarios</option>
+      </select>
     </div>
   `;
 }
 
+function collectDynamicData(formData, type) {
+  const keysByType = {
+    nueva_aplicacion: [
+      "proposedName", "requestingArea", "businessProblem",
+      "applicationObjective", "targetUsers", "estimatedUsers"
+    ],
+    mejora: [
+      "applicationName", "moduleName", "currentSituation",
+      "requestedChange", "expectedResult", "justification"
+    ],
+    nueva_funcionalidad: [
+      "applicationName", "moduleName", "currentSituation",
+      "requestedChange", "expectedResult", "justification"
+    ],
+    acceso: [
+      "applicationName", "moduleName", "accessType",
+      "affectedUser", "accessDetail"
+    ],
+    datos: [
+      "applicationName", "moduleName", "dataIssue", "expectedData"
+    ]
+  };
+
+  const defaultKeys = [
+    "applicationName", "moduleName", "userAction",
+    "errorMessage", "frequency", "affectedUsers"
+  ];
+
+  const keys = keysByType[type] || defaultKeys;
+  const result = {};
+
+  keys.forEach(key => {
+    const value = formData.get(key);
+    if (value !== null && String(value).trim() !== "") {
+      result[key] = String(value).trim();
+    }
+  });
+
+  return result;
+}
+
 function renderNewRequestForm() {
   app.innerHTML = `
-    <div class="page-kicker">SOPORTE → SOLICITANTE</div>
+    <div class="page-kicker">DESARROLLO DE APLICACIONES → SOLICITANTE</div>
     <h2 class="page-title">Nueva solicitud</h2>
     <p class="page-description">
-      Registre el requerimiento o incidente que necesita reportar al Área TI.
+      Registre un incidente, mejora, nueva funcionalidad o solicitud de aplicación para el Área de Desarrollo.
     </p>
 
     <div id="formMessage"></div>
 
     <form id="newRequestForm" class="request-form">
       <div class="form-grid">
+        <div class="form-section-title full">Clasificación de la solicitud</div>
+
+        <div class="form-group full">
+          <label for="requestType">Tipo de solicitud *</label>
+          <select id="requestType" name="requestType" required>
+            ${Object.entries(requestTypes).map(([value, label]) =>
+              `<option value="${value}">${label}</option>`
+            ).join("")}
+          </select>
+          <small>Seleccione la opción que mejor describa la necesidad.</small>
+        </div>
+
         <div class="form-group full">
           <label for="requestTitle">Asunto / título *</label>
           <input
@@ -144,18 +353,8 @@ function renderNewRequestForm() {
             type="text"
             required
             maxlength="120"
-            placeholder="Ej: No puedo ingresar al sistema de inventarios"
+            placeholder="Ej: La aplicación de inventarios no permite guardar pedidos"
           />
-        </div>
-
-        <div class="form-group">
-          <label for="requestCategory">Categoría *</label>
-          <select id="requestCategory" name="category" required>
-            <option value="soporte">Soporte Técnico / TI</option>
-            <option value="hardware">Hardware / Equipo</option>
-            <option value="software">Acceso a Software / Permisos</option>
-            <option value="redes">Redes e Infraestructura</option>
-          </select>
         </div>
 
         <div class="form-group">
@@ -168,31 +367,44 @@ function renderNewRequestForm() {
           </select>
         </div>
 
-        <div id="dynamicFields" class="full">
-          ${dynamicFieldByCategory("soporte")}
+        <div class="form-group">
+          <label for="businessImpact">Impacto en la operación *</label>
+          <select id="businessImpact" name="businessImpact" required>
+            <option value="bajo">Bajo - puedo continuar trabajando</option>
+            <option value="medio" selected>Medio - afecta parcialmente el proceso</option>
+            <option value="alto">Alto - impide una actividad importante</option>
+            <option value="total">Total - el proceso está detenido</option>
+          </select>
         </div>
+
+        <div id="dynamicFields" class="full">
+          ${dynamicFieldsByType("app_no_abre")}
+        </div>
+
+        <div class="form-section-title full">Descripción general</div>
 
         <div class="form-group full">
           <label for="requestDescription">Descripción detallada *</label>
           <textarea
             id="requestDescription"
             name="description"
-            rows="6"
+            rows="5"
             required
-            maxlength="1500"
-            placeholder="Explique qué sucede, desde cuándo ocurre y cómo afecta su trabajo."
+            maxlength="2000"
+            placeholder="Explique la necesidad con el mayor detalle posible."
           ></textarea>
         </div>
 
         <div class="form-group full">
-          <label for="requestFiles">Archivos adjuntos</label>
+          <label for="requestFiles">Capturas o evidencias</label>
           <input
             id="requestFiles"
             name="attachments"
             type="file"
             multiple
+            accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,.xlsx,.txt"
           />
-          <small>Puede seleccionar capturas, documentos u otras evidencias.</small>
+          <small>Puede adjuntar capturas, documentos o archivos relacionados.</small>
         </div>
 
         <label class="checkbox-row full">
@@ -202,44 +414,45 @@ function renderNewRequestForm() {
       </div>
 
       <div class="form-actions">
-        <button id="clearRequestForm" class="btn-secondary" type="reset">Limpiar</button>
+        <button class="btn-secondary" type="reset">Limpiar</button>
         <button class="btn-primary" type="submit">Crear solicitud</button>
       </div>
     </form>
   `;
 
   const form = document.getElementById("newRequestForm");
-  const category = document.getElementById("requestCategory");
+  const requestType = document.getElementById("requestType");
   const dynamicFields = document.getElementById("dynamicFields");
 
-  category.addEventListener("change", () => {
-    dynamicFields.innerHTML = dynamicFieldByCategory(category.value);
+  requestType.addEventListener("change", () => {
+    dynamicFields.innerHTML = dynamicFieldsByType(requestType.value);
+  });
+
+  form.addEventListener("reset", () => {
+    setTimeout(() => {
+      dynamicFields.innerHTML = dynamicFieldsByType("app_no_abre");
+    }, 0);
   });
 
   form.addEventListener("submit", event => {
     event.preventDefault();
 
     const formData = new FormData(form);
-    const attachments = [...document.getElementById("requestFiles").files].map(file => file.name);
+    const files = [...document.getElementById("requestFiles").files].map(file => file.name);
     const user = users[currentUserKey];
-
-    const categoryLabels = {
-      soporte: "Soporte Técnico / TI",
-      hardware: "Hardware / Equipo",
-      software: "Acceso a Software / Permisos",
-      redes: "Redes e Infraestructura"
-    };
+    const type = formData.get("requestType");
 
     const request = {
       id: nextRequestId(),
+      requestType: type,
+      requestTypeLabel: requestTypes[type],
       title: formData.get("title").trim(),
-      category: categoryLabels[formData.get("category")],
-      categoryKey: formData.get("category"),
       priority: formData.get("priority"),
-      additionalInfo: (formData.get("additionalInfo") || "").trim(),
+      businessImpact: formData.get("businessImpact"),
       description: formData.get("description").trim(),
+      details: collectDynamicData(formData, type),
       confidential: formData.get("confidential") === "on",
-      attachments,
+      attachments: files,
       status: "Pendiente",
       createdAt: new Date().toISOString(),
       createdById: user.id,
@@ -250,13 +463,14 @@ function renderNewRequestForm() {
 
     document.getElementById("formMessage").innerHTML = `
       <div class="success-message">
-        Solicitud <strong>#${request.id}</strong> creada correctamente.
+        Solicitud <strong>#${request.id}</strong> creada correctamente como
+        <strong>${request.requestTypeLabel}</strong>.
         Estado inicial: <strong>Pendiente</strong>.
       </div>
     `;
 
     form.reset();
-    dynamicFields.innerHTML = dynamicFieldByCategory("soporte");
+    dynamicFields.innerHTML = dynamicFieldsByType("app_no_abre");
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 }
@@ -277,14 +491,14 @@ function renderContent() {
     description = "Aquí construiremos el listado de solicitudes del Solicitante.";
   } else if (currentView === "inbox") {
     title = "Bandeja de solicitudes";
-    description = "Aquí construiremos la bandeja de trabajo del Área TI.";
+    description = "Aquí construiremos la bandeja de trabajo del Área de Desarrollo.";
   } else if (currentView === "tracking") {
     title = "Seguimiento";
-    description = "Aquí construiremos el seguimiento y gestión de tickets.";
+    description = "Aquí construiremos el seguimiento y gestión de solicitudes de aplicaciones.";
   }
 
   app.innerHTML = `
-    <div class="page-kicker">SOPORTE → ${user.role.toUpperCase()}</div>
+    <div class="page-kicker">DESARROLLO DE APLICACIONES → ${user.role.toUpperCase()}</div>
     <h2 class="page-title">${title}</h2>
     <p class="page-description">${description}</p>
 
