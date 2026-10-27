@@ -766,3 +766,31 @@ button,select,input,textarea{font:inherit}
     min-width:100%;
   }
 }
+
+
+/* Evita desbordes cuando el usuario escribe textos muy largos sin espacios */
+.detail-card,
+.conversation-card,
+.detail-field,
+.message-item,
+.requests-table td,
+.requests-table .long-text{
+  min-width:0;
+  max-width:100%;
+}
+
+.detail-field p,
+.message-item p,
+.requests-table td,
+.requests-table .long-text,
+.page-description,
+.activity-item strong{
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+
+.detail-field p,
+.message-item p{
+  width:100%;
+  max-width:100%;
+}
