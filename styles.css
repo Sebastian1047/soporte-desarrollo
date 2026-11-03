@@ -902,3 +902,15 @@ button,select,input,textarea{font:inherit}
   .topbar{flex-direction:column;align-items:stretch;gap:12px}
   .user-card{display:block;width:100%}
 }
+
+
+/* Regla de seguridad visual: ocultar submenús hasta que el usuario elija módulo.
+   También oculta submenús generados por JavaScript previamente almacenado en caché. */
+#sidebarMenu .sidebar-current-label,
+#sidebarMenu .sidebar-subnav {
+  display: none !important;
+}
+body.module-chosen #sidebarMenu .sidebar-current-label,
+body.module-chosen #sidebarMenu .sidebar-subnav {
+  display: block !important;
+}
