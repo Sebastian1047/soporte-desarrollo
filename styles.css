@@ -914,3 +914,17 @@ body.module-chosen #sidebarMenu .sidebar-current-label,
 body.module-chosen #sidebarMenu .sidebar-subnav {
   display: block !important;
 }
+
+
+/* Entrada a la sección Portal de Solicitudes dentro del menú principal */
+.module-toggle-label{
+  display:block;
+  min-width:0;
+  overflow-wrap:normal;
+  line-height:1.25;
+}
+.module-toggle{
+  gap:5px;
+  padding-inline:9px;
+  font-size:.68rem;
+}
