@@ -794,3 +794,111 @@ button,select,input,textarea{font:inherit}
   width:100%;
   max-width:100%;
 }
+
+
+/* Navegación del Portal de Solicitudes: módulos por perfil */
+#sidebarMenu{
+  display:block;
+}
+.module-toggle{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:11px 12px;
+  border:1px solid #547963;
+  border-radius:11px;
+  background:#224833;
+  color:#fff;
+  cursor:pointer;
+  text-align:left;
+  font-size:.73rem;
+  font-weight:850;
+}
+.module-toggle:hover,
+.module-toggle[aria-expanded="true"]{
+  background:#315e45;
+  border-color:#7da88a;
+}
+.module-chevron{
+  color:#c7e6d2;
+  font-size:.85rem;
+}
+.module-choices{
+  display:grid;
+  gap:6px;
+  margin:8px 0 14px;
+  padding:8px;
+  border:1px solid #315c45;
+  border-radius:12px;
+  background:#173b2a;
+}
+.module-choices[hidden]{
+  display:none !important;
+}
+.module-choice{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+  padding:10px 9px;
+  border:1px solid #426c55;
+  border-radius:10px;
+  background:#214833;
+  color:#f8fff9;
+  text-align:left;
+  font-size:.67rem;
+  font-weight:750;
+  cursor:pointer;
+}
+.module-choice:hover:not(:disabled),
+.module-choice.selected:not(:disabled){
+  background:var(--green-soft);
+  color:#163c29;
+  border-color:var(--green-soft);
+}
+.module-choice.module-locked,
+.module-choice:disabled{
+  opacity:.38;
+  cursor:not-allowed;
+  filter:grayscale(.7);
+  pointer-events:none;
+}
+.module-icon{
+  width:19px;
+  flex:0 0 19px;
+  font-size:.83rem;
+}
+.module-help{
+  margin:3px 2px 0;
+  font-size:.57rem;
+  line-height:1.45;
+  color:#c8dbcc;
+}
+.sidebar-current-label{
+  margin:18px 6px 8px;
+  color:#8aab99;
+  font-size:.54rem;
+  font-weight:900;
+  letter-spacing:.1em;
+}
+.sidebar-subnav .menu-btn{
+  margin-bottom:6px;
+}
+
+@media(max-width:780px){
+  .sidebar{
+    display:block;
+    overflow:visible;
+    padding:12px;
+  }
+  .brand{margin-bottom:12px}
+  .sidebar-section{display:block}
+  #sidebarMenu{display:block}
+  .sidebar-current-label{margin-top:12px}
+  .menu-btn{min-width:0;margin-bottom:6px}
+  .topbar{flex-direction:column;align-items:stretch;gap:12px}
+  .user-card{display:block;width:100%}
+}
