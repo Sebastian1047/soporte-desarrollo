@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal de Solicitudes</title>
+  <link rel="stylesheet" href="styles.css?v=20261103-15" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">FL</div>
+        <div>
+          <strong>FlowerLogix</strong>
+          <span>Portal de Solicitudes</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">PORTAL</div>
+      <nav id="sidebarMenu"></nav>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">PORTAL / SOLICITUDES</div>
+          <h1>Portal de Solicitudes</h1>
+          <p>Gestión de solicitudes para nuevas aplicaciones, mejoras y reportes de problemas.</p>
+        </div>
+
+        <div class="user-card">
+          <label>
+            Usuario de prueba
+            <select id="userSelector">
+              <option value="solicitante">María López · Solicitante</option>
+              <option value="desarrollo">Carlos Gómez · Área de Desarrollo</option>
+            </select>
+          </label>
+          <div class="user-info">
+            <strong id="userName"></strong>
+            <span id="userRole" class="role-badge"></span>
+          </div>
+          <button id="notificationButton" class="notification-button" type="button">
+            🔔 Sin novedades
+          </button>
+        </div>
+      </header>
+
+      <main id="app" class="main-card"></main>
+    </section>
+  </div>
+
+  <script src="app-v15.js?v=20261103-15"></script>
+</body>
+</html>
